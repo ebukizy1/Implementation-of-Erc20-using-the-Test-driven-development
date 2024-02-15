@@ -56,8 +56,11 @@ contract Erc20Token is IERC20{
     }
 
 
-    function transferFrom(address from, address to, uint256 value) external returns (bool){
-
+    function transferFrom(address _owner, address _recipent, uint256 _amount) external returns (bool){
+        balanceOf[_owner] -= _amount;
+        allowance[_owner][msg.sender] -= _amount;
+        balanceOf[_recipent] += _amount;
+        return true;
     }
 }
 

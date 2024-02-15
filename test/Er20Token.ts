@@ -92,6 +92,57 @@ describe.only("ERC20 Token Contract ", async()=>{
                 expect(updatedAllowance).to.equal(amountToSpend);
             });
         });
+        describe("Event Test for Approval", async ()=>{
+            it("test that after Approval event can be emited ", async()=>{
+                const amountToSpend = 2000;
+                const { erc20Token, owner, otherAccount, totalSupply } = await loadFixture(deployErc20TokenContract);
+        
+                // Check the initial allowance, it should be zero
+                const initialAllowance = await erc20Token.allowance(owner.address, otherAccount.address);
+                expect(initialAllowance).to.equal(0);
+        
+                // Approve otherAccount to spend amountToSpend
+                await expect(erc20Token.connect(owner).approve(otherAccount.address, amountToSpend))
+                .to.emit(erc20Token, "Approval").withArgs(owner, otherAccount, amountToSpend);
+            });
+        });
+        describe("Transfer From Test", async () => {
+            it("should allow the spender to spend from the transferFrom", async () => {
+                const amountToSpend = 2000;
+                const { erc20Token, owner, otherAccount, totalSupply } = await loadFixture(deployErc20TokenContract);
+        
+                // Check the initial allowance, it should be zero
+                const initialAllowance = await erc20Token.allowance(owner.address, otherAccount.address);
+                expect(initialAllowance).to.equal(0);
+        
+                // Approve otherAccount to spend amountToSpend
+                await erc20Token.connect(owner).approve(otherAccount.address, amountToSpend);
+        
+                // Check the updated allowance
+                const updatedAllowance = await erc20Token.allowance(owner.address, otherAccount.address);
+                expect(updatedAllowance).to.equal(amountToSpend);
+        
+                // Check the initial balances
+                const initialOwnerBalance = await erc20Token.balanceOf(owner.address);
+                const initialOtherAccountBalance = await erc20Token.balanceOf(otherAccount.address);
+        
+                // Transfer amountToSpend from owner to otherAccount using transferFrom
+                await erc20Token.connect(otherAccount).transferFrom(owner.address, otherAccount.address, amountToSpend);
+        
+                // Check the updated balances after the transfer
+                const updatedOwnerBalance = await erc20Token.balanceOf(owner.address);
+                const updatedOtherAccountBalance = await erc20Token.balanceOf(otherAccount.address);
+        
+                // Verify that the balances have been updated correctly
+                expect(updatedOwnerBalance).to.equal(Number(initialOwnerBalance) - amountToSpend);
+                expect(updatedOtherAccountBalance).to.equal(Number(initialOtherAccountBalance) + amountToSpend);
+        
+                // Verify that the allowance has been updated after transferFrom
+                const finalAllowance = await erc20Token.allowance(owner.address, otherAccount.address);
+                expect(finalAllowance).to.equal(0); // Allowance should be zero after the transfer
+            });
+        });
+        
         
       
     });
