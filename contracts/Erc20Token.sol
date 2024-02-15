@@ -56,10 +56,12 @@ contract Erc20Token is IERC20{
     }
 
 
-    function transferFrom(address _owner, address _recipent, uint256 _amount) external returns (bool){
-        balanceOf[_owner] -= _amount;
-        allowance[_owner][msg.sender] -= _amount;
-        balanceOf[_recipent] += _amount;
+    function transferFrom(address _owner, address _recipent, uint256 _numToken) external returns (bool){
+           require(_numToken <= balanceOf[_owner], "Insufficient balance");
+        require(_numToken <= allowance[owner][msg.sender],  "Insufficient allowance");
+        balanceOf[_owner] -= _numToken;
+        allowance[_owner][msg.sender] -= _numToken;
+        balanceOf[_recipent] += _numToken;
         return true;
     }
 }

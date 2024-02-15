@@ -142,8 +142,43 @@ describe.only("ERC20 Token Contract ", async()=>{
                 expect(finalAllowance).to.equal(0); // Allowance should be zero after the transfer
             });
         });
-        
-        
+        describe("Transfer from Validation ", async()=>{
+            it("test that amount cannot be greater than allowance to spend", async()=>{
+                const amountToSpend = 2000;
+                const inValidAmount = 20000;
+                const { erc20Token, owner, otherAccount, totalSupply } = await loadFixture(deployErc20TokenContract);
+                // Check the initial allowance, it should be zero
+                const initialAllowance = await erc20Token.allowance(owner.address, otherAccount.address);
+                expect(initialAllowance).to.equal(0);
+                await erc20Token.connect(owner).approve(otherAccount.address, amountToSpend);
+
+                // Check the updated allowance
+                const updatedAllowance = await erc20Token.allowance(owner.address, otherAccount.address);
+                expect(updatedAllowance).to.equal(amountToSpend);
+
+                await expect(erc20Token.connect(otherAccount).transferFrom(owner.address, otherAccount.address, inValidAmount))
+                .to.rejectedWith("Insufficient allowance");
+            });
+            it("test that amount cannot be greater than balance ", async()=>{
+                const amountToSpend = 2000;
+                const inValidAmount = 20000000;
+                const { erc20Token, owner, otherAccount, totalSupply } = await loadFixture(deployErc20TokenContract);
+                // Check the initial allowance, it should be zero
+                const initialAllowance = await erc20Token.allowance(owner.address, otherAccount.address);
+                expect(initialAllowance).to.equal(0);
+                await erc20Token.connect(owner).approve(otherAccount.address, amountToSpend);
+
+                // Check the updated allowance
+                const updatedAllowance = await erc20Token.allowance(owner.address, otherAccount.address);
+                expect(updatedAllowance).to.equal(amountToSpend);
+ 
+                await expect(erc20Token.connect(otherAccount).transferFrom(owner.address, otherAccount.address, inValidAmount))
+                .to.rejectedWith( "Insufficient balance");
+            });
+            
+                
+        });
+  
       
     });
     
