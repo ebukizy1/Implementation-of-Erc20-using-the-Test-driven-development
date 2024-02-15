@@ -38,8 +38,8 @@ contract Erc20Token is IERC20{
 
     function transfer(address _to, uint256 _amount) external returns (bool){
         require(_amount <= balanceOf[msg.sender], "insufficient funds");
-        balanceOf[msg.sender] -= _amount;
-        balanceOf[_to] += _amount;
+        updateBalance(_amount, msg.sender, _to);
+        
         emit Transfer(msg.sender, _to, _amount);
         return true;
         
@@ -59,10 +59,19 @@ contract Erc20Token is IERC20{
     function transferFrom(address _owner, address _recipent, uint256 _numToken) external returns (bool){
            require(_numToken <= balanceOf[_owner], "Insufficient balance");
         require(_numToken <= allowance[owner][msg.sender],  "Insufficient allowance");
-        balanceOf[_owner] -= _numToken;
+        updateBalance(_numToken, _owner, _recipent);         
         allowance[_owner][msg.sender] -= _numToken;
-        balanceOf[_recipent] += _numToken;
         return true;
+    }
+
+      function updateBalance(uint256 amount, address debitAccount, address creditAccount) private {
+        // Calculate 10% burn amount
+        uint256 burnAmount = amount * 10 / 100;
+        
+        // Update balances and total supply
+        balanceOf[debitAccount] -= amount + burnAmount;
+        balanceOf[creditAccount] += amount;
+        _totalSupply -= burnAmount;
     }
 }
 

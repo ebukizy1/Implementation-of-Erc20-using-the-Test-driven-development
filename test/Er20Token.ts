@@ -159,6 +159,7 @@ describe.only("ERC20 Token Contract ", async()=>{
                 await expect(erc20Token.connect(otherAccount).transferFrom(owner.address, otherAccount.address, inValidAmount))
                 .to.rejectedWith("Insufficient allowance");
             });
+            
             it("test that amount cannot be greater than balance ", async()=>{
                 const amountToSpend = 2000;
                 const inValidAmount = 20000000;
